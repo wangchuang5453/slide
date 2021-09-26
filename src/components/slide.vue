@@ -47,6 +47,7 @@ export default {
       this.$children[this.newM - 1].setActive(top);
     },
     getNewMTop() {
+      console.log(this.$children[this.newM - 1].top);
       return Number(this.$children[this.newM - 1].top.split('px')[0]);
     },
     setItem(index, translateYValue, scaleValue) {
@@ -57,6 +58,9 @@ export default {
     },
     setToTopBack(index) {
       this.$children[index].setToTopBack();
+    },
+    setToBottomBack(index) {
+      this.$children[index].setToBottomBack();
     },
     initPage() {
       this.$children[this.page_n - 1].initPage();
@@ -76,6 +80,11 @@ export default {
       this.$children[this.newM - 1].delActiveStatusBack();
       this.$children[this.newM - 1].resetShowStatus(false);
     },
+    resetToBottomPageBack() {
+      this.$children[this.page_n - 1].delActiveStatusBottomBack();
+      this.$children[this.newM - 1].delActiveStatusBottomBack();
+      this.$children[this.newM - 1].resetShowStatus(false);
+    }
   }
 }
 </script>

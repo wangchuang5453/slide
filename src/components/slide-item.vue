@@ -2,7 +2,7 @@
   <section class="m-page"
     ref="mPage"
     :style="{'top': top, 'transform': 'translate(0px,-' + translateY + 'px) scale('+ scale +')', }"
-    :class="{'active': showActive, 'show': show, 'hide': !show, 'animationTop': animationTop, 'animationTopBack': animationTopBack}"
+    :class="{'active': showActive, 'show': show, 'hide': !show, 'animationTop': animationTop, 'animationTopBack': animationTopBack, 'animationBottomBack': animationBottomBack}"
     @mousedown="touchstart"
     @touchstart="touchstart"
     @mousemove="touchmove"
@@ -55,6 +55,7 @@
         show: false,
         animationTop: false,
         animationTopBack: false,
+        animationBottomBack: false,
       }
     },
     methods: {
@@ -134,7 +135,8 @@
               //移动中设置页面的值（top）
               this.start = false;
               
-              const topV = this.slide.getNewMTop();
+              const topV = parseInt(this.slide.getNewMTop());
+              console.log(topV, '==== topv');
               const newMTopV = topV + this.moveP - this.initP
               // 下一页上升
               this.slide.setActive(newMTopV + 'px');
@@ -146,12 +148,11 @@
               } else {//向下
                 const bn3 = this.winHeight + (newMTopV);
                 const bn4 = ((this.winHeight - bn3 / 4)/ this.winHeight);
-                console.log(11111);
                 if(this.Msize != this.slide.newM){
                   this.slide.setItem(this.slide.newM, bn3/4, bn4);
                 } else {
                   this.slide.setItem(0, bn3/4, bn4);
-                }  
+                }
               }
               this.initP = this.moveP;
             } else {
@@ -174,7 +175,7 @@
         this.position ? move_p = this.moveP - this.firstP > 100 : move_p = this.firstP - this.moveP > 100 ;
         if(this.move){
           //切画页面(移动成功)
-          if( move_p && Math.abs(this.moveP) >5 ){	
+          if( move_p && Math.abs(this.moveP) >5 ){
             // $(".m-page").eq(newM-1).animate({'top':0},300,"easeOutSine",function(){
             //   /*
             //   ** 切换成功回调的函数
@@ -187,7 +188,8 @@
           } else if (Math.abs(this.moveP) >=5){	//页面退回去
             // this.position ? $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine") : $(".m-page").eq(newM-1).animate({'top':v_h},100,"easeOutSine");
             if (this.position) {
-              $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine");
+              // $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine");
+              this.slide.setToBottomBack(this.slide.newM - 1);
             } else {
               // $(".m-page").eq(newM-1).animate({'top':v_h},100,"easeOutSine")
               this.slide.setToTopBack(this.slide.newM - 1);
@@ -218,6 +220,9 @@
       setToTopBack() {
         this.animationTopBack = true;
       },
+      setToBottomBack() {
+        this.animationBottomBack = true;
+      },
       setRestart() {
         this.start = true;
       },
@@ -231,6 +236,10 @@
           this.sucessBack();
           this.top = 0;
           this.slide.setRestart();
+        } else if (this.animationBottomBack) {
+          this.successToBottomBack();
+          this.top = 0;
+          this.slide.setRestart();
         }
       },
       success() {
@@ -240,6 +249,9 @@
       },
       sucessBack() {
         this.slide.resetPageBack();
+      },
+      successToBottomBack() {
+        this.slide.resetToBottomPageBack();
       },
       resetShowStatus(value) {
         this.show = value;
@@ -255,6 +267,12 @@
         this.translateY = 0;
         this.scale = 1;
         this.animationTopBack = false;
+      },
+      delActiveStatusBottomBack() {
+        this.showActive = false;
+        this.translateY = 0;
+        this.scale = 1;
+        this.animationBottomBack = false;
       },
       initPage(){
         this.show = true;
@@ -292,6 +310,14 @@
   animation-timing-function: ease-in-out;
 }
 
+.animationBottomBack {
+  animation-name: toBottomBack;
+  animation-iteration-count: 1;
+  animation-direction: forward;
+  animation-duration: .1s;
+  animation-timing-function: ease-in-out; 
+}
+
 @keyframes toTop {
   100% {
     top: 0;
@@ -300,6 +326,11 @@
 @keyframes toTopBack {
   100% {
     top: 100vh;
+  }
+}
+@keyframes toBottomBack {
+  100% {
+    top: -100vh;
   }
 }
 </style>
