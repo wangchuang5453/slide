@@ -55,8 +55,26 @@ export default {
     setToTop(index) {
       this.$children[index].setToTop();
     },
+    setToTopBack(index) {
+      this.$children[index].setToTopBack();
+    },
     initPage() {
-      this.$children[0].initPage();
+      this.$children[this.page_n - 1].initPage();
+    },
+    setRestart() {
+      this.$children[this.page_n - 1].setRestart();
+    },
+    resetPage() {
+      this.$children[this.page_n - 1].delActiveStatus();
+      this.$children[this.page_n - 1].resetShowStatus(false);
+      this.$children[this.newM - 1].delActiveStatus();
+      this.$children[this.newM - 1].resetShowStatus(true);
+    },
+    resetPageBack() {
+      // console.log(this.page_n);
+      this.$children[this.page_n - 1].delActiveStatusBack();
+      this.$children[this.newM - 1].delActiveStatusBack();
+      this.$children[this.newM - 1].resetShowStatus(false);
     },
   }
 }

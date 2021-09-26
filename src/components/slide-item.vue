@@ -2,7 +2,7 @@
   <section class="m-page"
     ref="mPage"
     :style="{'top': top, 'transform': 'translate(0px,-' + translateY + 'px) scale('+ scale +')', }"
-    :class="{'active': showActive, 'show': show, 'hide': !show, 'animationTop': animationTop}"
+    :class="{'active': showActive, 'show': show, 'hide': !show, 'animationTop': animationTop, 'animationTopBack': animationTopBack}"
     @mousedown="touchstart"
     @touchstart="touchstart"
     @mousemove="touchmove"
@@ -23,7 +23,7 @@
       // this.v_h = window.getComputedStyle(this.$refs.mPage).height;
       this.v_h = document.documentElement.clientHeight + 'px';
       this.winHeight = document.documentElement.clientHeight;
-      window.addEventListener('animationend', this.animationend, false)
+      this.$el.addEventListener('animationend', this.animationend, false)
     },
     inject: ['slide'],
     props: {
@@ -54,6 +54,7 @@
         winHeight: null, //= $(window).height(),
         show: false,
         animationTop: false,
+        animationTopBack: false,
       }
     },
     methods: {
@@ -132,6 +133,7 @@
             if(this.move){
               //移动中设置页面的值（top）
               this.start = false;
+              
               const topV = this.slide.getNewMTop();
               const newMTopV = topV + this.moveP - this.initP
               // 下一页上升
@@ -144,6 +146,7 @@
               } else {//向下
                 const bn3 = this.winHeight + (newMTopV);
                 const bn4 = ((this.winHeight - bn3 / 4)/ this.winHeight);
+                console.log(11111);
                 if(this.Msize != this.slide.newM){
                   this.slide.setItem(this.slide.newM, bn3/4, bn4);
                 } else {
@@ -155,7 +158,6 @@
               this.moveP = null;	
             }
           } else {
-            console.log('2')
             this.moveP = null;	
           }
 		    }
@@ -182,12 +184,18 @@
             // })
             this.slide.setToTop(this.slide.newM - 1);
           //返回页面(移动失败)
-          }else if (Math.abs(this.moveP) >=5){	//页面退回去
-            position ? $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine") : $(".m-page").eq(newM-1).animate({'top':v_h},100,"easeOutSine");
-            $(".m-page").attr("style","");
-            $(".m-page").eq(newM-1).removeClass("active");
-            start = true;
-            $(".m-page").attr("style","");
+          } else if (Math.abs(this.moveP) >=5){	//页面退回去
+            // this.position ? $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine") : $(".m-page").eq(newM-1).animate({'top':v_h},100,"easeOutSine");
+            if (this.position) {
+              $(".m-page").eq(newM-1).animate({'top':-v_h},100,"easeOutSine");
+            } else {
+              // $(".m-page").eq(newM-1).animate({'top':v_h},100,"easeOutSine")
+              this.slide.setToTopBack(this.slide.newM - 1);
+            }
+            // $(".m-page").attr("style","");
+            // $(".m-page").eq(newM-1).removeClass("active");
+            // start = true;
+            // $(".m-page").attr("style","");
           }
         }
         /* 初始化值 */
@@ -206,19 +214,51 @@
       },
       setToTop() {
         this.animationTop = true;
-        // this.top = 0;
+      },
+      setToTopBack() {
+        this.animationTopBack = true;
+      },
+      setRestart() {
+        this.start = true;
       },
       animationend() {
-        this.top = 0;
-        this.success();
+        if (this.animationTop) {
+          // 此处监听的是覆盖上去的那个组件
+          this.top = 0;
+          this.success();
+        } else if (this.animationTopBack) {
+          // 此处触发监听的是返回的那个组件
+          this.sucessBack();
+          this.top = 0;
+          this.slide.setRestart();
+        }
       },
       success() {
+        this.slide.resetPage();
         this.slide.page_n = this.slide.newM;
-		    this.start = true;
+        this.start = true;
+      },
+      sucessBack() {
+        this.slide.resetPageBack();
+      },
+      resetShowStatus(value) {
+        this.show = value;
+      },
+      delActiveStatus() {
+        this.showActive = false;
+        this.translateY = 0;
+        this.scale = 1;
+        this.animationTop = false;
+      },
+      delActiveStatusBack() {
+        this.showActive = false;
+        this.translateY = 0;
+        this.scale = 1;
+        this.animationTopBack = false;
       },
       initPage(){
         this.show = true;
-      }
+      },
     }
   }
 </script>
@@ -244,9 +284,22 @@
   animation-timing-function: ease-in-out;
 }
 
+.animationTopBack {
+  animation-name: toTopBack;
+  animation-iteration-count: 1;
+  animation-direction: forward;
+  animation-duration: .1s;
+  animation-timing-function: ease-in-out;
+}
+
 @keyframes toTop {
   100% {
     top: 0;
+  }
+}
+@keyframes toTopBack {
+  100% {
+    top: 100vh;
   }
 }
 </style>
