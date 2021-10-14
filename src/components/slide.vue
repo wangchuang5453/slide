@@ -1,18 +1,7 @@
 <template>
   <div class="p-index main" id="con"> 
-    <slide-item>
-      <div class="bg"></div>
-    </slide-item>
-    <slide-item>
-      <div class="bg1"></div>
-    </slide-item>
-    <slide-item>
-      <div class="bg2"></div>
-    </slide-item>
-    <slide-item>
-      <div class="bg3"></div>
-    </slide-item>
     <!-- <section class='u-arrow'><img src="image2/btn01_arrow.png" /></section> -->
+    <slot></slot>
 </div>
 
 </template>
@@ -23,6 +12,28 @@ export default {
   name: 'HelloWorld',
   mounted() {
     this.initPage();
+  },
+  props: {
+    fastMode: {
+      type: Boolean,
+      default: true,
+    },
+    maxSize: {
+      type: Number,
+      require: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    disabledToNextPage: {
+      type: Boolean,
+      default: false,
+    },
+    disabledToLastPage: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
@@ -40,58 +51,90 @@ export default {
     slideItem,
   },
   methods: {
+    getChildById(index) {
+      const slots = this.$slots.default;
+      const slideName = slots[index].child.slideName;
+      const instance = this.$children.find((item) => item.slideName == slideName);
+      return instance;
+    },
     toSetIndexP(value) {
       this.indexP = value;
     },
     setActive(top) {
-      this.$children[this.newM - 1].setActive(top);
+      // this.$children[this.newM - 1].setActive(top);
+      this.getChildById(this.newM - 1).setActive(top);
     },
     getNewMTop() {
-      console.log(this.$children[this.newM - 1].top);
-      return Number(this.$children[this.newM - 1].top.split('px')[0]);
+      // return Number(this.$children[this.newM - 1].top.split('px')[0]);
+      return Number(this.getChildById(this.newM - 1).top.split('px')[0]);
     },
     setItem(index, translateYValue, scaleValue) {
-      this.$children[index].setItem(translateYValue, scaleValue);
+      // this.$children[index].setItem(translateYValue, scaleValue);
+      this.getChildById(index).setItem(translateYValue, scaleValue);
     },
-    setToTop(index) {
-      this.$children[index].setToTop();
+    setToTop(index, direction, slideName) {
+      // this.$children[index].setToTop();
+      this.getChildById(index).setToTop();
+      this.emitPageChange(index, direction, slideName);
     },
     setToTopBack(index) {
-      this.$children[index].setToTopBack();
+      // this.$children[index].setToTopBack();
+      this.getChildById(index).setToTopBack();
     },
     setToBottomBack(index) {
-      this.$children[index].setToBottomBack();
+      // this.$children[index].setToBottomBack();
+      this.getChildById(index).setToBottomBack();
     },
     initPage() {
-      this.$children[this.page_n - 1].initPage();
+      // this.$children[this.page_n - 1].initPage();
+      const slideName = this.getChildById(this.page_n - 1).initPage();
+      this.emitPageChange(this.page_n - 1, -1, '');
+      this.emitPageChangeEnd(slideName);
     },
     setRestart() {
-      this.$children[this.page_n - 1].setRestart();
+      // this.$children[this.page_n - 1].setRestart();
+      this.getChildById(this.page_n - 1).setRestart();
     },
     resetPage() {
-      this.$children[this.page_n - 1].delActiveStatus();
-      this.$children[this.page_n - 1].resetShowStatus(false);
-      this.$children[this.newM - 1].delActiveStatus();
-      this.$children[this.newM - 1].resetShowStatus(true);
+      this.getChildById(this.page_n - 1).delActiveStatus();
+      this.getChildById(this.page_n - 1).resetShowStatus(false);
+      this.getChildById(this.newM - 1).delActiveStatus();
+      this.getChildById(this.newM - 1).resetShowStatus(true);
+      // this.$children[this.page_n - 1].delActiveStatus();
+      // this.$children[this.page_n - 1].resetShowStatus(false);
+      // this.$children[this.newM - 1].delActiveStatus();
+      // this.$children[this.newM - 1].resetShowStatus(true);
     },
     resetPageBack() {
-      // console.log(this.page_n);
-      this.$children[this.page_n - 1].delActiveStatusBack();
-      this.$children[this.newM - 1].delActiveStatusBack();
-      this.$children[this.newM - 1].resetShowStatus(false);
+      // this.$children[this.page_n - 1].delActiveStatusBack();
+      // this.$children[this.newM - 1].delActiveStatusBack();
+      // this.$children[this.newM - 1].resetShowStatus(false);
+      this.getChildById(this.page_n - 1).delActiveStatusBack();
+      this.getChildById(this.newM - 1).delActiveStatusBack();
+      this.getChildById(this.newM - 1).resetShowStatus(false);
     },
     resetToBottomPageBack() {
-      this.$children[this.page_n - 1].delActiveStatusBottomBack();
-      this.$children[this.newM - 1].delActiveStatusBottomBack();
-      this.$children[this.newM - 1].resetShowStatus(false);
-    }
+      // this.$children[this.page_n - 1].delActiveStatusBottomBack();
+      // this.$children[this.newM - 1].delActiveStatusBottomBack();
+      // this.$children[this.newM - 1].resetShowStatus(false);
+      this.getChildById(this.page_n - 1).delActiveStatusBottomBack();
+      this.getChildById(this.newM - 1).delActiveStatusBottomBack();
+      this.getChildById(this.newM - 1).resetShowStatus(false);
+    },
+    emitPageChange(page, direction, slideName) {
+      this.$emit('pageChange', {page, direction, lastSlideName: slideName});
+    },
+    goToNextPageDirectly() {
+      // this.$children[this.page_n - 1].goToNextPageDirectly();
+      this.getChildById(this.page_n - 1).goToNextPageDirectly();
+    },
+    emitPageChangeEnd(activeSlideName) {
+      this.$emit('pageChangeEnd', {activeSlideName});
+    },
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
-// img{user-select:​ none;}
 .main{
   width:100%;height:100%;
   margin:0 auto;
@@ -114,25 +157,5 @@ export default {
   width: 24px; height: 14px;
   background-position: 0 -82px;
 	animation: start 1.5s infinite ease-in-out;
-}
-.bg {
-  background-color: red;
-  width: 100%;
-  height: 100%;
-}
-.bg1 {
-  background-color: blue;
-  width: 100%;
-  height: 100%;
-}
-.bg2 {
-  background-color: yellow;
-  width: 100%;
-  height: 100%;
-}
-.bg3 {
-  background-color: black;
-  width: 100%;
-  height: 100%;
 }
 </style>
